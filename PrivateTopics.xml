@@ -329,11 +329,15 @@
 						foreach ($b['children'] as $ch)
 						{
 							if (!$pt->allowedToSee($user_info['id'], $b['id']))
-								unset($context['categories'][$c['id']]['boards'][$b['id']]['last_post']);
+								$context['categories'][$c['id']]['boards'][$b['id']]['last_post'] = array(
+									'hidden_text' => $pt->tools->getText('boardindex_message_default')
+								);
 						}
 
 					if (!$pt->allowedToSee($user_info['id'], $b['id']))
-						unset($context['categories'][$c['id']]['boards'][$b['id']]['last_post']);
+						$context['categories'][$c['id']]['boards'][$b['id']]['last_post'] = array(
+							'hidden_text' => $pt->tools->getText('boardindex_message_default')
+						);
 				}
 
 				/* We do the same for children boards */
@@ -344,7 +348,9 @@
 							$pt = new PrivateTopics($ch['last_post']['topic']);
 
 							if (!$pt->allowedToSee($user_info['id'], $ch['id']))
-									unset($context['categories'][$c['id']]['boards'][$b['id']]['children'][$ch['id']]);
+								$context['categories'][$c['id']]['boards'][$b['id']]['children'][$ch['id']] = array(
+									'hidden_text' => $pt->tools->getText('boardindex_message_default')
+								);
 						}
 			}
 	/* PrivateTopics mod */]]></add>
@@ -369,12 +375,14 @@
 			<search position="after"><![CDATA[	// If there are children, but no topics and no ability to post topics...]]></search>
 			<add><![CDATA[	/* PrivateTopics mod */
 	foreach ($context['boards'] as $b)
-		if (!empty($b['last_post']))
+		if (!empty($b['last_post']['topic']))
 		{
 			$pt = new PrivateTopics($b['last_post']['topic']);
 
 			if (!$pt->allowedToSee($user_info['id'], $b['id']))
-				unset($context['boards'][$b['id']]['last_post']);
+				$context['boards'][$b['id']]['last_post'] = array(
+					'hidden_text' => $pt->tools->getText('boardindex_message_default')
+				);
 		}
 	/* PrivateTopics mod */
 
@@ -540,40 +548,14 @@ suggestMember();
 						', $txt['on'], ' ', $board['last_post']['time'],'
 						</p>';]]></search>
 			<add><![CDATA[if (!empty($board['last_post']['id']))
-					if (!empty($modSettings['PrivateTopics_enable']))
-					{
-						global $user_info;
-						$ptTrue = false;
-						$pt = new PrivateTopics($board['last_post']['id']);
-						$ptCache = $pt->doGet();
-
-						if (!empty($ptCache) && is_array($ptCache) && !allowedTo('can_always_see_private_topics'))
-						{
-							if (!in_array($user_info['id'], $ptCache))
-								echo '
-							<p>', !empty($modSettings['PrivateTopics_boardindex_message']) ? $modSettings['PrivateTopics_boardindex_message'] : PrivateTopics::doTools()->getText('boardindex_message_default') ,'</p>';
-
-							else
-								echo '
-								<p><strong>', $txt['last_post'], '</strong>  ', $txt['by'], ' ', $board['last_post']['member']['link'], '<br />
-								', $txt['in'], ' ', $board['last_post']['link'], '<br />
-								', $txt['on'], ' ', $board['last_post']['time'],'
-								</p>';
-						}
-
-						else
-							echo '
-							<p><strong>', $txt['last_post'], '</strong>  ', $txt['by'], ' ', $board['last_post']['member']['link'], '<br />
-							', $txt['in'], ' ', $board['last_post']['link'], '<br />
-							', $txt['on'], ' ', $board['last_post']['time'],'
-							</p>';
-					}
-
-					else
-						echo '
+					echo '
 						<p><strong>', $txt['last_post'], '</strong>  ', $txt['by'], ' ', $board['last_post']['member']['link'], '<br />
 						', $txt['in'], ' ', $board['last_post']['link'], '<br />
 						', $txt['on'], ' ', $board['last_post']['time'],'
+						</p>';
+				elseif (!empty($board['last_post']['hidden_text']))
+					echo '
+						<p>', $board['last_post']['hidden_text'], '
 						</p>';]]></add>
 		</operation>
 	</file>
@@ -587,40 +569,14 @@ suggestMember();
 						', $txt['on'], ' ', $board['last_post']['time'],'
 						</p>';]]></search>
 			<add><![CDATA[if (!empty($board['last_post']['id']))
-					if (!empty($modSettings['PrivateTopics_enable']))
-					{
-						global $user_info;
-						$ptTrue = false;
-						$pt = new PrivateTopics($board['last_post']['id']);
-						$ptCache = $pt->doGet();
-
-						if (!empty($ptCache) && is_array($ptCache) && !allowedTo('can_always_see_private_topics'))
-						{
-							if (!in_array($user_info['id'], $ptCache))
-								echo '
-							<p>', !empty($modSettings['PrivateTopics_boardindex_message']) ? $modSettings['PrivateTopics_boardindex_message'] : PrivateTopics::doTools()->getText('boardindex_message_default') ,'</p>';
-
-							else
-								echo '
-								<p><strong>', $txt['last_post'], '</strong>  ', $txt['by'], ' ', $board['last_post']['member']['link'], '<br />
-								', $txt['in'], ' ', $board['last_post']['link'], '<br />
-								', $txt['on'], ' ', $board['last_post']['time'],'
-								</p>';
-						}
-
-						else
-							echo '
-							<p><strong>', $txt['last_post'], '</strong>  ', $txt['by'], ' ', $board['last_post']['member']['link'], '<br />
-							', $txt['in'], ' ', $board['last_post']['link'], '<br />
-							', $txt['on'], ' ', $board['last_post']['time'],'
-							</p>';
-					}
-
-					else
-						echo '
+				echo '
 						<p><strong>', $txt['last_post'], '</strong>  ', $txt['by'], ' ', $board['last_post']['member']['link'], '<br />
 						', $txt['in'], ' ', $board['last_post']['link'], '<br />
 						', $txt['on'], ' ', $board['last_post']['time'],'
+						</p>';
+			elseif (!empty($board['last_post']['hidden_text']))
+				echo '
+						<p>', $board['last_post']['hidden_text'], '
 						</p>';]]></add>
 		</operation>
 	</file>
